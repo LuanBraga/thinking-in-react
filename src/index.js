@@ -26,7 +26,7 @@ class ProductRow extends React.Component {
       </span>;
 
     return (
-      <tr className="t-b-product-row">
+      <tr>
         <td>{name}</td>
         <td>{product.price}</td>
       </tr>
@@ -36,10 +36,19 @@ class ProductRow extends React.Component {
 
 class ProductTable extends React.Component {
   render() {
+    const filterText = this.props.filterText;
+    const inStockOnly = this.props.inStockOnly;
+
     const rows = [];
     let lastCategory = null;
     
     this.props.products.forEach((product) => {
+      if (product.name.indexOf(filterText) === -1) {
+        return;
+      }
+      if (inStockOnly && !product.stocked) {
+        return;
+      }
       if (product.category !== lastCategory) {
         rows.push(
           <ProductCategoryRow
@@ -70,12 +79,38 @@ class ProductTable extends React.Component {
 }
 
 class SearchBar extends React.Component {
+  constructor(props){
+    super(props);
+    this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
+    this.handleInStockChange = this.handleInStockChange.bind(this);
+  }
+
+  handleFilterTextChange(e) {
+    this.props.onFilterTextChange(e.target.value);
+  }
+
+  handleInStockChange(e) {
+    this.props.onInStockChange(e.target.checked)
+  }
+
   render() {
+    const filterText = this.props.filterText;
+    const inStockOnly =  this.props.inStockOnly;
+
     return (
       <form className="s-b-container">
-        <input type="text" placeholder="Search..." />
+        <input 
+          type="text" 
+          placeholder="Search..." 
+          value={filterText}
+          onChange={this.handleFilterTextChange}
+        />
         <p>
-          <input type="checkbox" />
+          <input 
+            type="checkbox" 
+            checked={inStockOnly}
+            onChange={this.handleInStockChange}
+          />
           {' '}
           Only show products in stock
         </p>
@@ -84,12 +119,41 @@ class SearchBar extends React.Component {
   }
 }
 
+//O state deve ficar no elemento pai que possui os filhos que irão compartilhar o state
 class FilterableProductTable extends React.Component {
+  constructor(props){
+    super(props);
+    //definindo o state
+    this.state = {filterText: '', inStockOnly: false};
+  }
+
+  //calbacks que serão passados para SearchBar e ProductTAble e serão chamados sempre que o state precisar ser alterado
+  handleFilterTextChange = (filterText) => {
+    this.setState({
+      filterText: filterText
+    });
+  }
+
+  handleInStockChange = (inStockOnly) => {
+    this.setState({
+      inStockOnly: inStockOnly
+    });
+  }
+
   render() {
     return (
       <div className="f-p-t-container">
-        <SearchBar />
-        <ProductTable products={this.props.products} />
+        <SearchBar
+          filterText={this.state.filterText}
+          inStockOnly={this.state.inStockOnly}
+          onFilterTextChange={this.handleFilterTextChange}    
+          onInStockChange={this.handleInStockChange}  
+        />
+        <ProductTable 
+          products={this.props.products}
+          filterText={this.state.filterText}
+          inStockOnly={this.state.inStockOnly}
+        />
       </div>
     );
   }
