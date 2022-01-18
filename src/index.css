@@ -35,3 +35,17 @@ code {
 
   background-color: rgb(58, 199, 255);
 }
+
+.t-b-container {
+  width: 90%;
+  height: 80%;
+}
+
+.t-b-head {
+  background-color: rgb(255, 255, 255);
+}
+
+.t-b-category-row {
+  background-color: black;
+  color:rgb(255, 255, 255);
+}
